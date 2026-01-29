@@ -345,6 +345,18 @@
     </section>
     <!-- End of Skills section -->
 
+    <!-- Portfolio section -->
+    <section id="portfolio" class="section">
+      <div class="container text-center">
+        <h6 class="subtitle">Portfolio</h6>
+        <h6 class="section-title mb-4">Mes projets</h6>
+        <p class="mb-5 pb-4">Les projets</p>
+
+        <div class="row g-4" id="portfolio-repos"></div>
+      </div>
+    </section>
+    <!-- End of portfolio section -->
+
     <!-- Contact Section -->
     <section id="contact" class="position-relative section">
       <div class="container text-center">
@@ -474,6 +486,68 @@
           .getElementById("contact")
           .scrollIntoView({ behavior: "smooth" });
       }
+    </script>
+    <script>
+      const USERNAME = "Detio1";
+      const API_URL = `https://api.github.com/users/${USERNAME}/repos?per_page=100`;
+
+      const portfolioContainer = document.getElementById("portfolio-repos");
+
+      fetch(API_URL)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Erreur API GitHub");
+          }
+          return response.json();
+        })
+        .then((repos) => {
+          const filteredRepos = repos.filter(
+            (repo) =>
+              !repo.fork && // pas un fork
+              repo.size > 50 && // pas vide (en Ko)
+              repo.language !== null && // vrai code
+              !repo.archived // pas mort
+          );
+
+          filteredRepos.forEach((repo) => {
+            console.log(repo.name, repo.description);
+            const col = document.createElement("div");
+            col.className = "col-md-4";
+
+            col.innerHTML = `
+              <div class="card h-100 shadow-sm">
+                <div class="card-body text-start">
+                  <h4 class="card-title bold">${repo.name}</h4>
+                  <p class="card-text">
+                    ${repo.description ?? "Aucune description fournie."}
+                  </p>
+                </div>
+    
+                <div class="card-footer text-muted small">
+                  <div class="d-flex justify-content-between gap-2 mb-3">
+                    <a
+                      href="${repo.html_url}"
+                      target="_blank"
+                      class="btn btn-outline-dark btn-sm w-100"
+                    >
+                      Voir sur GitHub
+                    </a>
+                  </div>
+                  <div>
+                    ⭐ ${repo.stargazers_count}
+                    · 🍴 ${repo.forks_count}
+                    · 🧠 ${repo.language ?? "N/A"}
+                  </div>
+                </div>
+              </div>
+            `;
+
+            portfolioContainer.appendChild(col);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     </script>
   </body>
 </html>
